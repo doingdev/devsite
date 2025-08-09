@@ -151,7 +151,7 @@
       statusDiv.textContent = "⏳ Crawling your site. Please wait...";
       statusDiv.className = "status";
       try {
-        const resp = await fetch('hidden', {
+        const resp = await fetch('https://llms-gen.onrender.com/api/llms-txt', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({url}),

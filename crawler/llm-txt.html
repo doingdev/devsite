@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LLM.TXT Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --accent: gray;
+      --bg: #ffffff;
+      --light: #f3f4f6;
+      --border: #e5e7eb;
+      --input-bg: #f9fafb;
+      --input-focus: #dde0fb;
+      --shadow: 0 2px 12px rgba(88,101,242,0.08);
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      margin: 0;
+      color: #18181b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shell {
+      width: 100%;
+      max-width: 420px;
+      background: var(--light);
+      padding: 2.5em 1.5em 2em 1.5em;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      margin: 2em 0;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 0.35em;
+      font-size: 2rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    p {
+      color: #5e6470;
+      margin-bottom: 1.5em;
+      font-size: 1rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      margin-bottom: 1.25em;
+    }
+    input[type="url"] {
+      padding: 1em;
+      border-radius: 14px;
+      border: 1.8px solid var(--border);
+      background: var(--input-bg);
+      font-size: 1.08em;
+      outline: none;
+      transition: border .2s, background .2s;
+    }
+    input[type="url"]:focus {
+      border: 1.8px solid var(--accent);
+      background: var(--input-focus);
+    }
+    button {
+      border: none;
+      border-radius: 17px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.13em;
+      font-weight: 700;
+      padding: 0.80em 2.2em;
+      margin-top: 0.2em;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(88,101,242,.12);
+      transition: background .18s, box-shadow .18s, transform .18s;
+    }
+    button:active {
+      background: #434dda;
+      transform: scale(0.97);
+      box-shadow: 0 2px 9px rgba(88,101,242,0.16);
+    }
+    .status, .error {
+      margin-top: 1em;
+      color: var(--accent);
+      font-size: 1.07em;
+      font-weight: 500;
+    }
+    .error {color: #e74c3c;}
+    .result {
+      background: #e9eaf7;
+      white-space: pre-line;
+      border-radius: 13px;
+      font-size: 1.04em;
+      color: #23234a;
+      text-align: left;
+      padding: 1.1em 1em;
+      margin: 1.4em 0 0.7em 0;
+      border: 1px solid #dee1fa;
+      min-height: 80px;
+      overflow-x: auto;
+      letter-spacing: -0.01em;
+    }
+    #download-btn {
+      background: linear-gradient(90deg,var(--accent),#666666);
+      margin-top: 0.5em;
+      padding-left: 1.8em;
+      padding-right: 1.8em;
+      font-size: 1.08em;
+    }
+    @media (max-width: 500px) {
+      .shell {padding: 1.35em 0.4em;}
+      h1 {font-size: 1.35em;}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>LLM.TXT Generator</h1>
+    <p>Generate an AI-ready <b>llms.txt</b> for your site in seconds.<br>
+      Just enter your URL. We’ll crawl the site and prep your file.</p>
+    <form id="llmtxt-form">
+      <div class="form-group">
+        <input id="url" type="url" placeholder="https://yourdomain.com" required autocomplete="off"/>
+      </div>
+      <button type="submit">Generate LLM.TXT</button>
+    </form>
+    <div id="status" class="status"></div>
+    <div id="result" class="result"></div>
+    <div>
+      <button id="download-btn" style="display:none;">Download llms.txt</button>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('llmtxt-form');
+    const statusDiv = document.getElementById('status');
+    const resultDiv = document.getElementById('result');
+    const downloadBtn = document.getElementById('download-btn');
+    let lastTxt = "";
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.textContent = "";
+      downloadBtn.style.display = "none";
+      const url = document.getElementById('url').value;
+      statusDiv.textContent = "⏳ Crawling your site. Please wait...";
+      statusDiv.className = "status";
+      try {
+        const resp = await fetch('hidden', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({url}),
+        });
+        if (!resp.ok) throw new Error('Site crawl failed. Please try again.');
+        const data = await resp.json();
+        if (!data.llms_txt) throw new Error('No content returned.');
+        resultDiv.textContent = data.llms_txt;
+        lastTxt = data.llms_txt;
+        statusDiv.textContent = "✅ All done! Copy or download your llms.txt below.";
+        downloadBtn.style.display = "inline-block";
+      } catch (err) {
+        statusDiv.textContent = "⚠️ " + err.message;
+        statusDiv.className = "error";
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([lastTxt], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "llms.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  </script>
+</body>
+</html>

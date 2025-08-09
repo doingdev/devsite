@@ -55,6 +55,7 @@
       margin-bottom: 1.25em;
     }
     input[type="url"] {
+      margin-top: 35px;
       padding: 1em;
       border-radius: 14px;
       border: 1.8px solid var(--border);
@@ -121,20 +122,26 @@
 </head>
 <body>
   <div class="shell">
-    <h1>LLM.TXT Generator</h1>
-    <p>Generate an AI-ready <b>llms.txt</b> for your site in seconds.<br>
-      Just enter your URL. We’ll crawl the site and prep your file.</p>
+    <h1>lms.txt file generator</h1>
+    <p>Generate an AI-ready <strong>lms.txt</strong> for your site in seconds.<strong>Just enter your URL</strong></p>
+    <p><a class="mb-3" href="https://llmstxt.org/"> what is an lms.txt?</a></p>
+
     <form id="llmtxt-form">
       <div class="form-group">
         <input id="url" type="url" placeholder="https://yourdomain.com" required autocomplete="off"/>
       </div>
-      <button type="submit">Generate LLM.TXT</button>
+      <button type="submit">Generate lms.txt</button>
     </form>
     <div id="status" class="status"></div>
     <div id="result" class="result"></div>
     <div>
       <button id="download-btn" style="display:none;">Download llms.txt</button>
     </div>
+    <footer>
+      <div class="text-center mt-4">
+        <p class="text-muted small">Made with insights by <a href="https://doingdev.github.io/devsite/">@doingdev</a></p>
+      </div>
+    </footer>
   </div>
   <script>
     const form = document.getElementById('llmtxt-form');

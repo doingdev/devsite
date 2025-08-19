@@ -1,7 +1,9 @@
+
 import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
+from dotenv import load_dotenv
 app = FastAPI()
 
 from actions import crawl_and_extract_llms_elements, elements_to_llms_txt
@@ -14,10 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# WIP
-CLIENT_ID = "your_client_id"
-CLIENT_SECRET = "your_client_secret"
-REDIRECT_URI = "https://your-app-name.glitch.me/auth/pipedrive/callback"
+
+load_dotenv("common.env")
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+REDIRECT_URI = os.getenv("REDIRECT_URI")
 
 @app.get('/auth/pipedrive/callback')
 async def pipedrive_callback(request: Request):
@@ -57,7 +60,7 @@ async def create_llms_txt(request: Request):
     llms_txt = elements_to_llms_txt(elements)
     return {"llms_txt": llms_txt}
 
-# handler = Mangum(app)  # <-- Required for AWS Lambda!
+# WIP handler = Mangum(app)  # <-- Required for AWS Lambda!
 
 
 if __name__ == "__main__":

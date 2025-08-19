@@ -1,7 +1,8 @@
 import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-# from mangum import Mangum
+import httpx
+app = FastAPI()
 
 from actions import crawl_and_extract_llms_elements, elements_to_llms_txt
 
@@ -12,6 +13,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# WIP
+CLIENT_ID = "your_client_id"
+CLIENT_SECRET = "your_client_secret"
+REDIRECT_URI = "https://your-app-name.glitch.me/auth/pipedrive/callback"
+
+@app.get('/auth/pipedrive/callback')
+async def pipedrive_callback(request: Request):
+    code = request.query_params.get("code")
+    if not code:
+        return {"error": "Missing code"}
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://oauth.pipedrive.com/oauth/token",
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": REDIRECT_URI,
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        token_data = response.json()
+    
+    # Optionally, you can redirect the user or return a success message
+    if response.status_code == 200:
+        return {"success": token_data}
+    else:
+        return {"error": "Failed to retrieve access token", "details": token_data}
 
 
 @app.post("/api/llms-txt")
